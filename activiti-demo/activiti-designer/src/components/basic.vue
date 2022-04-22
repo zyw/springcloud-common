@@ -12,7 +12,6 @@ import myLeave from '../res/Leave.bpmn';
 export default defineComponent({
   name: "BpmnModeler",
   setup() {
-
       const state = reactive({
         
       });

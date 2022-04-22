@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package jspb.test;
+
+option java_package = "com.google.apps.jspb.proto";
+option java_multiple_files = true;
+
+// legacy data, must be nested
+message User {
+  required string name = 1;
+}

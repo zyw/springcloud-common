@@ -1,0 +1,7 @@
+# 在bootstrap中设置的熟悉，都是跟config相关的，
+# 把 Spring Cloud Config 的元信息放在 bootstrap 里是 spring cloud 推荐的方式。
+spring:
+  profiles:
+    active: dev
+  application:
+    name: springcloud-nacos-config

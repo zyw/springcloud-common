@@ -1,0 +1,5 @@
+cn.v5cn.liyue.rpc.netty.serialize.impl.StringSerializer
+cn.v5cn.liyue.rpc.netty.serialize.impl.MetadataSerializer
+cn.v5cn.liyue.rpc.netty.serialize.impl.RpcRequestSerializer
+cn.v5cn.liyue.rpc.netty.serialize.impl.ObjectSerializer
+cn.v5cn.liyue.rpc.netty.serialize.impl.ObjectArraySerializer

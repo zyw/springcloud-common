@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-hostpath
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  # Capacity（存储能力）：一般来说，一个 PV 对象都要指定一个存储能力，通过 PV 的 capacity 属性来设置的，
+  # 目前只支持存储空间的设置，就是我们这里的 storage=10Gi，不过未来可能会加入 IOPS、吞吐量等指标的配置。
+  capacity:
+    storage: 10Gi
+
+  # AccessModes（访问模式）：用来对 PV 进行访问模式的设置，用于描述用户应用对存储资源的访问权限，访问权限包括下面几种方式：
+  # ReadWriteOnce（RWO）：读写权限，但是只能被单个节点挂载
+  # ReadOnlyMany（ROX）：只读权限，可以被多个节点挂载
+  # ReadWriteMany（RWX）：读写权限，可以被多个节点挂载
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+---
+# PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-hostpath
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+
+---
+# 使用PV和PVC
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-hostpath-pod
+spec:
+  volumes:
+    - name: pv-hostpath
+      persistentVolumeClaim:
+        claimName: pvc-hostpath
+  nodeSelector:
+    kubernetes.io/hostname: ydzs-node1
+  containers:
+    - name: task-pv-container
+      image: nginx
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: pv-hostpath

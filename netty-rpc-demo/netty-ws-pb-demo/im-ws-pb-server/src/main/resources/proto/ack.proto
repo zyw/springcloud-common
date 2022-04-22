@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package cn.v5cn.netty.ws.pb.generate;
+
+option java_multiple_files = true;
+option java_package = "cn.v5cn.netty.ws.pb.core.entity";
+option java_outer_classname = "AckWrapper";
+
+message AckMsg {
+  // 协议版本号，第一个版本：1，以此类推。
+  int32 version = 1;
+  // 消息id
+  int64 id = 2;
+  //接受者类型
+  DestType destType = 3;
+  // 发送者userId
+  string fromId = 4;
+  // 接收者userId
+  string destId = 5;
+  // 发送时间
+  int64 createTime = 6;
+  // 消息类型
+  MsgType msgType = 7;
+  // 消息体
+  int64 ackMsgId = 8;
+
+  enum DestType {
+    SINGLE = 0;
+    GROUP = 1;
+  }
+
+  enum MsgType {
+    DELIVERED = 0;
+    READ = 1;
+  }
+}

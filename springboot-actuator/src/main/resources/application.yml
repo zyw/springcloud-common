@@ -1,0 +1,23 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: actuator-demo
+  boot:
+    admin:
+      client:
+        url: http://localhost:9999
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,metrics,jolokia
+    jmx:
+      exposure:
+        include: health,info,env,metrics,jolokia
+  endpoint:
+    jolokia:
+      enabled: true
+      config:
+        debug: true

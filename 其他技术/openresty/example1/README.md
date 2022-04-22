@@ -1,0 +1,1 @@
+在`init_worker_by_lua_*`中使用`ngx.timer.at`绕开`nginx`限制。使用`cosocket`访问网络。

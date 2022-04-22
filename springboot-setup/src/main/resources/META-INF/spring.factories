@@ -1,0 +1,4 @@
+org.springframework.context.ApplicationListener=\
+  cn.v5cn.springboot.setup.listener.InitApplicationListener,\
+  cn.v5cn.springboot.setup.listener.Init2ApplicationListener,\
+  cn.v5cn.springboot.setup.listener.Init3ApplicationListener

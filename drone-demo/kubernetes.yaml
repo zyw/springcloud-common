@@ -1,0 +1,72 @@
+# 定义服务
+apiVersion: v1
+kind: Service
+metadata:
+  name: drone-demo-svc
+spec:
+  selector:
+    app: drone-demo
+  ports:
+    - protocol: TCP
+      port: 8080            # 服务端口, 内部可访问
+      targetPort: 9999      # 目标端口, 此处指的是pod的8080端口
+#      nodePort: 30080		# 节点端口, 外部可访问
+  type: NodePort
+---
+#定义Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drone-demo
+  # 定义标签
+  labels:
+    app: drone-demo
+spec:
+  replicas: 2
+  selector:
+    # 查找匹配标签
+    matchLabels:
+      app: drone-demo
+  template:
+    metadata:
+      name: drone-demo
+      # 定义标签
+      labels:
+        app: drone-demo
+    spec:
+      # 容器重启策略
+      restartPolicy: Always
+      containers:
+        - name: drone-demo
+#          image: registry.cn-hangzhou.aliyuncs.com/zywlxh/drone-demo
+          image: harbor.xa/library/drone-demo
+          # 镜像拉取策略
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9999
+          volumeMounts:
+            - mountPath: "/mnt/data"
+              name: local-test
+      volumes:
+        - name: local-test
+          persistentVolumeClaim:
+            # Rancher中创建了一个名为test的PVC
+            claimName: nfs
+---
+# 定义Ingress
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: drone-demo-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: drone.v5cn.cn
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: drone-demo-svc
+              servicePort: 8080
+  

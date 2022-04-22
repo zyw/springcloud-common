@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package message.entity;
+
+option java_multiple_files = true;
+option java_package = "cn.v5cn.netty.protobuf.demo.entity";
+option java_outer_classname = "StudentWrapper";
+
+message Student {
+  optional int32 age = 1;
+  optional string name = 2;
+}

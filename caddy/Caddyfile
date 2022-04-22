@@ -1,0 +1,58 @@
+{
+	# 全局日志
+	log {
+		output file ./log/access.log {
+			roll_size 1gb
+			roll_keep 5
+			roll_keep_for 720h
+		}
+	}
+}
+
+localhost {
+	respond "Hello, world!"
+}
+
+localhost:2016 {
+	handle_errors {
+		@404 {
+			expression {http.error.status_code} == 404
+		}
+		handle @404 {
+			rewrite * /404.html
+			file_server
+		}
+	}
+	# 第一种：配置方式
+	#	route /jeecg-boot/* {
+	#		uri replace /jeecg-boot/ /
+	#		# rewrite * /{path}
+	#		reverse_proxy https://api.boot.jeecg.com {
+	#			header_up Host {upstream_hostport}
+	#			header_up X-Forwarded-Host {host}
+	#		}
+	#	}
+	#	route {
+	#		root * ./pages
+	#		encode zstd gzip
+	#		try_files {path} /index.html
+	#		file_server
+	#	}
+
+	# 第二种：配置方式
+
+	encode zstd gzip
+	handle /jeecg-boot/* {
+		uri replace /jeecg-boot/ /
+		# rewrite * /{path}
+		reverse_proxy https://api.boot.jeecg.com {
+			header_up Host {upstream_hostport}
+			header_up X-Forwarded-Host {host}
+		}
+	}
+	handle {
+		root * ./pages
+		try_files {path} /
+		file_server
+	}
+}

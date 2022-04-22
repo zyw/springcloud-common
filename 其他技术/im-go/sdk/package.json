@@ -1,0 +1,26 @@
+{
+  "name": "im-sdk",
+  "version": "1.0.0",
+  "description": "im sdk",
+  "main": "index.ts",
+  "scripts": {
+    "run": "ts-node index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "im",
+    "sdk"
+  ],
+  "author": "zyw",
+  "license": "MIT",
+  "dependencies": {
+    "@types/websocket": "^1.0.2",
+    "buffer": "^6.0.3",
+    "nanoid": "^3.1.30",
+    "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "ts-node": "^10.0.0",
+    "typescript": "~4.1.5"
+  }
+}

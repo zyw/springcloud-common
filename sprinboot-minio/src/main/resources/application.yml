@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: minio-demo
+  servlet:
+    multipart:
+      max-file-size: 512MB
+      max-request-size: 1024MB
+
+
+minio:
+  endpoints: http://192.168.33.12:9000,http://192.168.33.17:9000
+  access-key: AKIAIOSFODNN7EXAMPLE
+  secret-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY

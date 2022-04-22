@@ -1,0 +1,73 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      default-filters:
+        - name: Hystrix
+          args:
+            name: fallbackcmd
+            fallbackUri: forward:/fallback
+      routes:
+        - id: service_1
+          uri: lb://SERVICE1
+          order: 7000
+          predicates:
+            - Path=/service/**
+          filters:
+            - SwaggerHeaderFilter
+            - StripPrefix=1
+        - id: service_auth
+          uri: lb://AUTH-SERVER
+          order: 8000
+          predicates:
+            - Path=/login/**
+          filters:
+            - StripPrefix=1
+  #设置访问eureka用户名密码
+  security:
+    user:
+      name: zhangsan
+      password: 123456
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@localhost:3000/eureka/
+      #defaultZone: http://localhost:3000/eureka/
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: debug
+
+# 设置熔断时间
+hystrix:
+  command:
+    # 跟上面的args中的name一样
+    fallbackcmd:
+      execution.isolation.thread.timeoutInMilliseconds: 5000
+
+auth:
+  permitall:
+    - pattern: /login/**
+    - pattern: /web/public/**
+    - pattern: v2/api-docs
+    - pattern: /swagger-resources/**
+    - pattern: /webjars/**
+
+security:
+  oauth2:
+    client:
+      accessTokenUri: /oauth/token
+      clientId: gateway
+      clientSecret: gateway
+    resource:
+      userInfoUri: /user
+      token-info-uri: /oauth/check_token

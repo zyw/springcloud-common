@@ -1,0 +1,8 @@
+server:
+  port: 8849
+
+fdfs:
+  tracker-list:
+    - 154.8.143.230:22122
+  so-timeout: 1500
+  connect-timeout: 1600

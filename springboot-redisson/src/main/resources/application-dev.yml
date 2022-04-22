@@ -1,0 +1,12 @@
+server:
+  port: 8999
+
+spring:
+  application:
+    name: redisson-demo
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 4
+    redisson:
+      config: classpath:redisson/redisson-dev.yaml

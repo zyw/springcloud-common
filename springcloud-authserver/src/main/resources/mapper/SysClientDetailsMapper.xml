@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.v5cn.springcloud.authserver.mapper.SysClientDetailsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.v5cn.springcloud.authserver.domain.SysClientDetails">
+        <id column="id" property="id" />
+        <result column="client_id" property="clientId" />
+        <result column="client_secret" property="clientSecret" />
+        <result column="resource_ids" property="resourceIds" />
+        <result column="scope" property="scope" />
+        <result column="authorized_grant_types" property="authorizedGrantTypes" />
+        <result column="web_server_redirect_uri" property="webServerRedirectUri" />
+        <result column="authorities" property="authorities" />
+        <result column="access_token_validity" property="accessTokenValidity" />
+        <result column="refresh_token_validity" property="refreshTokenValidity" />
+        <result column="additional_information" property="additionalInformation" />
+        <result column="autoapprove" property="autoapprove" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, client_id AS clientId, client_secret AS clientSecret, resource_ids AS resourceIds, scope, authorized_grant_types AS authorizedGrantTypes, web_server_redirect_uri AS webServerRedirectUri, authorities, access_token_validity AS accessTokenValidity, refresh_token_validity AS refreshTokenValidity, additional_information AS additionalInformation, autoapprove, create_time AS createTime, update_time AS updateTime, status
+    </sql>
+
+</mapper>

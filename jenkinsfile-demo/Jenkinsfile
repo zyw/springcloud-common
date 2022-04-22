@@ -1,0 +1,100 @@
+#!/usr/bin/env groovy
+pipeline {
+    agent any
+
+    stages {
+        stage('Pull code') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '0b3d077d-bc68-495c-88aa-dd299de59940', url: 'https://code.aliyun.com/v5cn/jenkinsfile-demo.git']]])
+            }
+        }
+
+        stage('Build project') {
+            steps {
+                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
+        }
+
+        stage('SSH Publish project') {
+            steps {
+                script {
+                    echo 'Remote SSH start --------------------------'
+                    def remote = [:]
+                    remote['name'] = 'dev'
+                    remote['host'] = '192.168.1.154'
+                    remote['user'] = 'root'
+                    remote['password'] = 'Powertime154#'
+                    remote['allowAnyHosts'] = true
+
+                    sshPut(remote: remote, from: 'docker/Dockerfile', into: '/mnt/jenkinsfile-demo')
+//                     sshPut(remote: remote, from: 'docker/run.sh', into: '/mnt/jenkinsfile-demo')
+//                     sshPut(remote: remote, from: 'docker/restart.sh', into: '/mnt/jenkinsfile-demo')
+
+                    sshPut(remote: remote, from: 'target/jenkinsfile-demo-1.0.0.jar', into: '/mnt/jenkinsfile-demo')
+
+//                     sshCommand(remote: remote, command: "chmod +x -R /mnt/jenkinsfile-demo/*")
+//                     sshCommand(remote: remote, command: "/mnt/jenkinsfile-demo/run.sh")
+
+                    sshScript(remote: remote, script: "./docker/run.sh")
+
+                    echo "Remote SSH end ---------------------------------"
+                }
+            }
+        }
+
+        /* stage('Publish project') {
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(configName: '154-dev', transfers: [
+                sshTransfer(
+                     cleanRemote: false,
+                     excludes: '',
+                     execCommand: '',
+                     execTimeout: 120000,
+                     flatten: false,
+                     makeEmptyDirs: false,
+                     noDefaultExcludes: false,
+                     patternSeparator: '[, ]+',
+                     remoteDirectory: '/mnt/jenkinsfile-demo',
+                     remoteDirectorySDF: false,
+                     removePrefix: 'docker',
+                     sourceFiles: 'docker/Dockerfile'),
+
+                sshTransfer(
+                    cleanRemote: false,
+                    excludes: '',
+                    execCommand:
+                        '''
+                        cd /mnt/jenkinsfile-demo;ls -all;
+                        docker rmi -f jenkinsfile-demo;
+                        docker build -t jenkinsfile-demo .;
+                        date;
+                        oldInstances=$(docker ps -a |grep -i jenkinsfile-demo|wc -l);
+                        if docker ps -a |grep -i jenkinsfile-demo;then
+
+                          echo  hase $oldInstances Instances.
+                        fi
+
+                        docker rm -f jenkinsfile-demo;
+                        docker run  -v /etc/localtime:/etc/localtime  \\
+                         --restart=on-failure:10 \\
+                         -e "JAVA_OPTS=-Xms256m -Xmx256m" \\
+                          -p 9191:8080 --name jenkinsfile-demo   -d jenkinsfile-demo;
+
+                        docker ps;
+                        ''',
+                    execTimeout: 120000,
+                    flatten: false,
+                    makeEmptyDirs: false,
+                    noDefaultExcludes: false,
+                    patternSeparator: '[, ]+',
+                    remoteDirectory: '/mnt/jenkinsfile-demo',
+                    remoteDirectorySDF: false,
+                    removePrefix: '',
+                    sourceFiles: 'target *//*.jar')],
+                usePromotionTimestamp: false,
+                useWorkspaceInPromotion: false,
+                verbose: false)])
+            }
+        } */
+    }
+}

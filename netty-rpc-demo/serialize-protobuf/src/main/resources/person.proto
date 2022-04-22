@@ -1,0 +1,15 @@
+//使用proto3语法
+syntax = "proto3";
+
+package tutorial;
+
+//指定输出类名
+option java_outer_classname="PersonProtobuf";
+//指定生成的java报名
+option java_package="cn.v5cn.serialize.protobuf";
+
+message Person {
+  string name = 1;
+  int32 id = 2;
+  string email = 3;
+}

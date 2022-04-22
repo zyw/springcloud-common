@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+package cn.v5cn.netty.im.protobuf.generate;
+option java_outer_classname = "Chat";
+
+message ChatMsg {
+  //协议版本号。第一版本：1，以此类推。
+  required int32 version = 1;
+  //消息id
+  required int64 id = 2;
+  //接收者类型。
+  required DestType destType = 3;
+  //发送者userId
+  required string fromId = 4;
+  //接收者userId
+  required string destId = 5;
+  //发送时间
+  required int64 createTime = 6;
+  //消息类型
+  required MsgType msgType = 7;
+  //消息体，json，格式由消息类型决定
+  required bytes msgBody = 8;
+
+  optional string addition = 32;
+
+  enum DestType {
+    SINGLE = 0;
+    GROUP = 1;
+  }
+
+  enum MsgType {
+    TEXT = 0;
+    FILE = 1;
+  }
+}
+
+message TextBody {
+  // 文字内容
+  required string text = 1;
+}
+
+message FileBody {
+  // 媒体文件上传得到的KEY,用于生成下载URL
+  required string fileId = 1;
+  // 文件的CRC32校验码
+  required int32 media_crc32 = 2;
+  // 文件大小（字节数）
+  required int32 fSize = 3;
+  // 文件名称
+  required string fName = 4;
+}

@@ -1,0 +1,94 @@
+server:
+  port: 9992
+
+spring:
+  application:
+    name: springboot-security   # 应用名称
+
+#  jpa:
+#    open-in-view: true
+#    database: POSTGRESQL
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#      dialect: org.hibernate.dialect.PostgreSQLDialect
+#    properties:
+#      hibernate:
+#        temp:
+#          use_jdbc_metadata_defaults: false
+#
+#  # 数据源 配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.1.154:3306/evaluation-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: DatebookHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  # redis 配置
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 0
+    jedis:
+      pool:
+        #最大连接数
+        max-active: 8
+        #最大空闲
+        max-idle: 8
+        #最大阻塞等待时间(负数表示没限制)
+        max-wait: -1ms
+        #最小空闲
+        min-idle: 0
+    #连接超时时间
+    timeout: 1000ms
+
+
+
+# JWT 配置
+jwt:
+  # 存放Token的Header Key
+  header: Authorization
+  # 密匙key
+  secret: mySecret
+  # 过期时间   单位秒 7天后过期  604800
+  expiration: 3600
+  # 自定义token 前缀字符
+  tokenHead: Bearer-
+  # 超时时间   单位秒
+  access_token: 3600
+  # 刷新token时间   单位秒
+  refresh_token: 3600
+  route:
+    authentication:
+      path: login/entry
+      refresh: oauth/refresh
+      register: login/account
+
+
+# 配置不需要认证的接口
+com:
+  example:
+    oauth:
+      security:
+        antMatchers:
+          /auth/v1/api/login/**,
+          /auth/v1/api/module/tree/**,
+          /auth/v1/api/grid/**
+
+
+# 日志
+logging:
+  level:
+    org:
+      springframework: DEBUG

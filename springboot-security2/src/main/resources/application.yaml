@@ -1,0 +1,22 @@
+server:
+  port: 8911
+
+spring:
+  application:
+    name: springboot-security2
+
+jwt:
+  # 密匙key
+  secret: javainuse
+  # 过期时间   单位秒 7天后过期  604800
+  token-expiration: 7200
+  # 刷新token时间   单位秒
+  refresh-token-expiration: 172800
+  antMatchers:
+    - /auth/login
+
+# 日志
+logging:
+  level:
+    org:
+      springframework: DEBUG

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>cn.v5cn.springcloud</groupId>
+	<artifactId>springcloud-common</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>springcloud-common</name>
+	<description>spring cloud的通用组件包括zuul、eureka和config</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.7.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<modules>
+		<module>springcloud-eureka</module>
+		<module>springcloud-zuul</module>
+		<module>springcloud-gateway</module>
+		<module>springcloud-authserver</module>
+        <module>springcloud-service</module>
+        <module>springcloud-commons</module>
+		<module>springcloud-authres-commons</module>
+        <module>springcloud-nacos</module>
+        <module>springcloud-rocketmq</module>
+        <module>springboot-fastdfs</module>
+        <module>springboot-rabbitmq</module>
+		<module>springboot-redisson</module>
+		<module>springboot-logstash</module>
+		<module>springboot-cache-jetcache</module>
+		<module>springboot-cache-j2cache</module>
+		<module>springboot-webmagic</module>
+		<module>springboot-dubbo-nacos</module>
+        <module>hystrix-demo</module>
+        <module>springboot-shiro</module>
+        <module>springboot-security</module>
+        <module>others</module>
+        <module>guice-demo</module>
+        <module>springboot-elasticsearch751</module>
+        <module>hbase14-demo</module>
+        <module>sprinboot-minio</module>
+        <module>hadoop3-demo</module>
+		<module>springboot-actuator</module>
+		<module>flink19-demo</module>
+        <module>kafka-demo</module>
+        <module>netty-rpc-demo</module>
+        <module>springboot-xxl-job</module>
+        <module>spark245-demo</module>
+        <module>springboot-security2</module>
+        <module>springboot-setup</module>
+        <module>dubbo-sofarpc-demo</module>
+        <module>jim-demo</module>
+        <module>captcha-demo</module>
+        <module>activiti-demo</module>
+        <module>redis-caffeine-L2-cache</module>
+		<module>drools-demo</module>
+	</modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Finchley.SR1</spring-cloud.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>2.9.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>2.9.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.16.20</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.11</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mybatis.spring.boot</groupId>
+				<artifactId>mybatis-spring-boot-starter</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>5.1.46</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>1.1.10</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-boot-starter</artifactId>
+				<version>3.0.5</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+
+	</build>
+
+</project>

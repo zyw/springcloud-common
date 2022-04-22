@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>springcloud-common</artifactId>
+        <groupId>cn.v5cn.springcloud</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>netty-rpc-demo</artifactId>
+    <packaging>pom</packaging>
+    <name>netty rpc 例子</name>
+    <modules>
+        <module>dynamic-proxy-jdk</module>
+        <module>dynamic-proxy-javassist</module>
+        <module>serialize-hessian</module>
+        <module>serialize-protobuf</module>
+        <module>rpc-laoqian</module>
+        <module>rpc-jdk</module>
+        <module>jdk-spi</module>
+        <module>dynamic-proxy-byte-buddy</module>
+        <module>rpc-grpc</module>
+        <module>queue-disruptor</module>
+        <module>rpc-liyue</module>
+        <module>rpc-lagou</module>
+        <module>netty-websocket</module>
+        <module>tomcat-websocket</module>
+        <module>springboot-websocket</module>
+        <module>springboot-netty-websocket</module>
+        <module>netty-im</module>
+        <module>netty-protobuf-demo</module>
+        <module>netty-ws-pb-demo</module>
+        <module>cim-parent</module>
+    </modules>
+
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>4.1.45.Final</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

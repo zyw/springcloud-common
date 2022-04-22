@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package cn.v5cn.netty.ws.pb.generate;
+
+option java_multiple_files = true;
+option java_package = "cn.v5cn.netty.ws.pb.core.entity";
+option java_outer_classname = "InternalWrapper";
+
+message InternalMsg {
+  //协议版本号。第一版本：1，以此类推。
+  int32 version = 1;
+  //消息id
+  int64 id = 2;
+  //发送模块
+  Module from = 3;
+  //接收模块
+  Module dest = 4;
+  //发送时间
+  int64 createTime = 5;
+  //消息类型
+  MsgType msgType = 6;
+  //消息体
+  optional string msgBody = 7;
+
+  enum Module {
+    CONNECTOR = 0;
+    TRANSFER = 1;
+    CLIENT = 2;
+  }
+
+  enum MsgType {
+    GREET = 0;
+    ACK = 1;
+    ERROR = 2;
+  }
+}

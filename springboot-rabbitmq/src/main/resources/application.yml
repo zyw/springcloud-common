@@ -1,0 +1,27 @@
+server:
+  port: 8999
+
+
+spring:
+  rabbitmq:
+    host: 154.8.143.230
+    port: 5672
+    username: lisi
+    password: 123456
+    virtual-host: /
+    listener:
+      simple:
+        # 采用手动应答
+        acknowledge-mode: manual
+        # 当前监听容器数
+        concurrency: 1
+        # 最大数
+        max-concurrency: 1
+        # 是否支持重试
+        retry:
+          enabled: true
+    # 支持发布确认
+    publisher-confirms: true
+    # 支持发布返回
+    publisher-returns: true
+

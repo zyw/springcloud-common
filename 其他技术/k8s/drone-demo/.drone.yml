@@ -1,0 +1,159 @@
+# 开发环境构建
+kind: pipeline
+type: docker
+name: dev-default
+
+# 使用trigger隔离构件分钟，也可以使用条件构建 https://docs.drone.io/pipeline/conditions/
+trigger:
+  branch:
+    - dev
+
+steps:
+  # 编译构件java代码
+  - name: build-jar
+    image: maven:3.6.3-jdk-8-slim
+    privileged: true
+    volumes:
+      - name: maven_cache
+        path: /root/.m2
+    commands:
+      - mvn clean package -DskipTests
+
+  # 打包docker镜像到仓库
+  - name: build-img
+    image: plugins/docker
+    # 挂载宿主机中docker镜像私有仓库证书
+    volumes:
+      - name: docker-certs
+        path: /etc/docker/certs.d/
+    settings:
+      dockerfile: Dockerfile
+      tags: latest
+      username:
+        #from_secret: loginName
+        from_secret: harbor
+      password:
+        #from_secret: pwd
+        from_secret: harborPwd
+      #repo: registry.cn-hangzhou.aliyuncs.com/zywlxh/drone-demo
+      #registry: registry.cn-hangzhou.aliyuncs.com
+      repo: harbor.xa/library/drone-demo
+      registry: harbor.xa
+      debug: true
+#      custom_dns: [ 192.168.1.254 ]
+  # 利用ssh插件部署应用到知道服务器
+#  - name: deploy
+#    image: appleboy/drone-ssh
+#    settings:
+#      host: 192.168.1.154
+#      username: root
+#      password: root
+#      port: 22
+#      script:
+#        docker run -d --name drone-demo -p 9999:9999 registry.cn-hangzhou.aliyuncs.com/zywlxh/drone-demo
+# 利用kubectl镜像部署镜像到k8s或者rancher
+  - name: deploy-kube
+    image: bitnami/kubectl
+    # 挂载宿主机的kubeconfig文件到容器
+    volumes:
+      - name: kube-config
+        path: /.kube/config
+    commands:
+      - kubectl apply -f kubernetes.yaml
+    when:
+      event: [push]
+      status: [ success ]
+
+volumes:
+  # maven缓存位置
+  - name: maven_cache
+    host:
+      path: /mnt/maven_cache
+  # docker私有仓库证书位置
+  - name: docker-certs
+    host:
+      path: /etc/docker/certs.d/
+  # k8s config文件位置
+  - name: kube-config
+    host:
+      path: /mnt/kubectl/config
+
+---
+# 生产环境构建
+kind: pipeline
+type: docker
+name: prod-default2
+
+trigger:
+  branch:
+    - master
+
+steps:
+  # 编译构件java代码
+  - name: build-jar
+    image: maven:3.6.3-jdk-8-slim
+    privileged: true
+    volumes:
+      - name: maven_cache
+        path: /root/.m2
+    commands:
+      - mvn clean package -DskipTests
+
+  # 打包docker镜像到仓库
+  - name: build-img
+    image: plugins/docker
+    # 挂载宿主机中docker镜像私有仓库证书
+    volumes:
+      - name: docker-certs
+        path: /etc/docker/certs.d/
+    settings:
+      dockerfile: Dockerfile
+      tags: latest
+      username:
+        #from_secret: loginName
+        from_secret: harbor
+      password:
+        #from_secret: pwd
+        from_secret: harborPwd
+      #repo: registry.cn-hangzhou.aliyuncs.com/zywlxh/drone-demo
+      #registry: registry.cn-hangzhou.aliyuncs.com
+      repo: harbor.xa/library/drone-demo
+      registry: harbor.xa
+      debug: true
+  #      custom_dns: [ 192.168.1.254 ]
+  # 利用ssh插件部署应用到知道服务器
+  #  - name: deploy
+  #    image: appleboy/drone-ssh
+  #    settings:
+  #      host: 192.168.1.154
+  #      username: root
+  #      password: root
+  #      port: 22
+  #      script:
+  #        docker run -d --name drone-demo -p 9999:9999 registry.cn-hangzhou.aliyuncs.com/zywlxh/drone-demo
+  # 利用kubectl镜像部署镜像到k8s或者rancher
+  - name: deploy-kube
+    image: bitnami/kubectl
+    # 挂载宿主机的kubeconfig文件到容器
+    volumes:
+      - name: kube-config
+        path: /.kube/config
+    commands:
+      - kubectl apply -f kubernetes.yaml
+    when:
+      event: [push]
+      status: [ success ]
+
+volumes:
+  # maven缓存位置
+  - name: maven_cache
+    host:
+      path: /mnt/maven_cache
+  # docker私有仓库证书位置
+  - name: docker-certs
+    host:
+      path: /etc/docker/certs.d/
+  # k8s config文件位置
+  - name: kube-config
+    host:
+      path: /mnt/kubectl/config

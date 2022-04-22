@@ -1,0 +1,75 @@
+image: maven:3-jdk-8
+
+# 部署docker in docker方式
+#services:
+#  - docker:dind
+
+stages:
+  - package
+#  - pack-image
+#  - ssh-job
+  - pack-image-ssh
+
+# 编译jar文件并拷贝到缓存目录下
+job_build:
+  stage: package
+  script:
+    - mvn clean package
+    - mkdir -p jars/{demo-dubbo-provider/target,demo-dubbo-consumer/target}
+    - cp -r demo-dubbo-consumer/target/*.jar jars/demo-dubbo-consumer/target
+    - cp -r demo-dubbo-consumer/Dockerfile jars/demo-dubbo-consumer
+    - cp -r demo-dubbo-provider/target/*.jar jars/demo-dubbo-provider/target
+    - cp -r demo-dubbo-provider/Dockerfile jars/demo-dubbo-provider/
+  artifacts:
+    name: jars
+    paths:
+      - jars
+  tags:
+    - pt
+
+# 部署gitlab runner所在机器docker in docker方式
+#job_pack_image:
+#  image: docker:stable
+#  stage: pack-image
+#  script:
+#    - cd jars
+#    - docker build -t demo-dubbo-consumer demo-dubbo-consumer/.
+#    - docker build -t demo-dubbo-provider demo-dubbo-provider/.
+#  tags:
+#    - pt
+
+# https://juejin.im/post/5cb5309cf265da034c701d74 方式部署远程机器
+#job_shell:
+#  stage: ssh-job
+#  dependencies:
+#    - job_build
+#  before_script:
+#    - mkdir -p ~/.ssh
+##    - chmod 700 ~/.shh
+#    - eval $(ssh-agent -s)
+#    - echo "$TEST_KNOWN_HOST" > ~/.ssh/known_hosts
+#    - chmod 644 ~/.ssh/known_hosts
+#    - echo "$TEST_CONFIG" > ~/.ssh/config
+#    - chmod 600 ~/.ssh/config
+#    - echo "$TEST_PRIVATE_KEY" > ~/.ssh/id_rsa
+#    - chmod 600 ~/.ssh/id_rsa
+#    - ssh-add ~/.ssh/id_rsa
+#    - command -v rsync || (apt-get -qq update && apt-get -qq install -y rsync)
+#  script:
+#    - rsync -rve ssh jars/ root@node20:~/jars/
+#    - ssh node20 "cd jars/; docker build -t demo-dubbo-consumer demo-dubbo-consumer/.;docker build -t demo-dubbo-provider demo-dubbo-provider/.;"
+#  after_script:
+#    - echo "完成。"
+#  tags:
+#    - pt
+
+# shell方式部署远程机器
+# gitlab runner非docker运行
+# 在gitlab runner运行的机器的gitlab-runner用户下创建ssh免密码登录
+job_pack_image_ssh:
+  stage: pack-image-ssh
+  script:
+    - scp -r jars/ node201:~/jars/
+    - ssh node201 "ls;pwd"
+  tags:
+    - shell

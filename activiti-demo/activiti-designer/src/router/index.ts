@@ -80,6 +80,18 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/custom/ContextPadView.vue')
       },
     ]
+  },
+  {
+    path: '/bpmn',
+    name: "BPMN",
+    component: () => import('../views/bpmn/BpmnView.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Renderer',
+        component: () => import('../views/bpmn/RendererView.vue')
+      }
+    ]
   }
 ]
 

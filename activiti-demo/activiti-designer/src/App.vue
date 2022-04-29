@@ -2,6 +2,7 @@
   <button @click="basic()" type="button">Bpmn基础</button>
   <button @click="custom()" type="button">自定义palette</button>
   <button @click="renderer()" type="button">自定义renderer</button>
+  <button @click="bpmn()" type="button">BPMN</button>
   <router-view></router-view>
 </template>
 
@@ -19,6 +20,9 @@ import { Options, Vue } from 'vue-class-component'
     },
     renderer() {
       this.$router.push("/renderer")
+    },
+    bpmn() {
+      console.log("bpmn----------------------")
     }
   }
 })

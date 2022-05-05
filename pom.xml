@@ -59,7 +59,8 @@
         <module>activiti-demo</module>
         <module>redis-caffeine-L2-cache</module>
 		<module>drools-demo</module>
-	</modules>
+        <module>springboot-template</module>
+    </modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

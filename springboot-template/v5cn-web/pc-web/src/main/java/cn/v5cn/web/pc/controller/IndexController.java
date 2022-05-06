@@ -1,5 +1,7 @@
 package cn.v5cn.web.pc.controller;
 
+import cn.v5cn.web.common.log.BusinessLog;
+import cn.v5cn.web.common.log.LogAnnotionOpTypeEnum;
 import cn.v5cn.web.common.rwv.ResponseResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +16,7 @@ import java.util.Map;
 public class IndexController {
 
     @ResponseResult
+    @BusinessLog(title = "测试日志", opType = LogAnnotionOpTypeEnum.CHANGE_STATUS)
     @GetMapping("/index")
     public Object index() {
         Map<String,Object> result = new HashMap<>();

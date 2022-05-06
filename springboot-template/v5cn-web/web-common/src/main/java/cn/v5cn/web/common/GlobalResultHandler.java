@@ -2,6 +2,7 @@ package cn.v5cn.web.common;
 
 import cn.v5cn.web.common.rwv.ResponseResult;
 import cn.v5cn.web.common.rwv.ResponseResultInterceptor;
+import cn.v5cn.web.common.util.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -55,7 +56,8 @@ public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
     @ResponseBody
     @ExceptionHandler(Exception.class)
     public Result exceptionHandler(Exception e) {
-        e.printStackTrace();
+//        e.printStackTrace();
+        log.error(ExceptionUtil.getMessage(e));
         // TODO 添加自定义的一些异常返回值
         return Result.error();
     }

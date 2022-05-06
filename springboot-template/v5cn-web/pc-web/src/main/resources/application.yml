@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+
+logging:
+  level:
+    org:
+      mybatis: debug
+    dao: debug

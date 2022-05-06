@@ -19,7 +19,7 @@ public class BaseWebAppConfigurer implements WebMvcConfigurer {
         // 多个拦截器组成一个拦截器链
         // addPathPatterns 用于添加拦截规则
         // excludePathPatterns 用户排除拦截
-        // 添加幂等性认证的拦截器
+        // 添加Controller返回值包装拦截器
         registry.addInterceptor(responseResultInterceptor());
     }
 

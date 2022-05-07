@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>cn.v5cn.springcloud</groupId>
             <artifactId>web-common</artifactId>
         </dependency>

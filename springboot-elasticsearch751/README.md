@@ -1,3 +1,12 @@
+## docker安装Elasticsearch
+```shell
+docker run --name elasticsearch --restart always \
+-c "sh elasticsearch-plugin install https://github.com/KennFalcon/elasticsearch-analysis-hanlp/releases/download/v7.5.1/elasticsearch-analysis-hanlp-7.5.1.zip 
+   && elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.5.1/elasticsearch-analysis-ik-7.5.1.zip 
+   && elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v7.5.1/elasticsearch-analysis-pinyin-7.5.1.zip" \
+-v /mnt/elasticsearch:/usr/share/elasticsearch/data \
+-p 9200:9200 -p 9300:9300 -d docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+```
 ## docker-compose安装
 ```shell script
 curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose;
@@ -102,6 +111,8 @@ GET /_cat/plugins
 
 #ik_max_word
 #ik_smart
+#Analyzer: ik_smart , ik_max_word , Tokenizer: ik_smart , ik_max_word
+
 #hanlp: hanlp默认分词
 #hanlp_standard: 标准分词
 #hanlp_index: 索引分词
@@ -113,7 +124,7 @@ GET /_cat/plugins
 
 POST _analyze
 {
-  "analyzer": "hanlp_standard",
+  "analyzer": "ik_smart",
   "text": ["剑桥分析公司多位高管对卧底记者说，他们确保了唐纳德·特朗普在总统大选中获胜"]
 
 }

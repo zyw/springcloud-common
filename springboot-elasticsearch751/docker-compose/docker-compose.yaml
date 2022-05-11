@@ -1,0 +1,76 @@
+version: "3.9"
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.3
+    container_name: kibana7173
+    environment:
+      - I18N_LOCALE=zh-CN
+      - XPACK_GRAPH_ENABLED=true
+      - TIMELION_ENABLED=true
+      - XPACK_MONITORING_COLLECTION_ENABLED="true"
+#      - ELASTICSEARCH_HOSTS="http://es7173_01:9200"
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    networks:
+      - es7173net
+  es7173_01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    container_name: es7173_01
+    environment:
+      - cluster.name=es-sentiment
+      - node.name=es7173_01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es7173_01,es7173_02
+      # - network.publish_host=elasticsearch
+      - cluster.initial_master_nodes=es7173_01,es7173_02
+#      - xpack.security.enabled=true
+#      - xpack.license.self_generated.type=basic
+#      - xpack.security.transport.ssl.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es7173data1:/usr/share/elasticsearch/data
+      - /mnt/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+    networks:
+      - es7173net
+  es7173_02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    container_name: es7173_02
+    environment:
+      - cluster.name=es-sentiment
+      - node.name=es7173_02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es7173_01,es7173_02
+      # - network.publish_host=elasticsearch
+      - cluster.initial_master_nodes=es7173_01,es7173_02
+#      - xpack.security.enabled=true
+#      - xpack.license.self_generated.type=basic
+#      - xpack.security.transport.ssl.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es7173data2:/usr/share/elasticsearch/data
+      - /mnt/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - es7173net
+
+
+volumes:
+  es7173data1:
+    driver: local
+  es7173data2:
+    driver: local
+
+networks:
+  es7173net:
+    driver: bridge

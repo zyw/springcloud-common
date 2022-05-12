@@ -8,8 +8,19 @@ docker run --name elasticsearch --restart always \
 -p 9200:9200 -p 9300:9300 -d docker.elastic.co/elasticsearch/elasticsearch:7.5.1
 ```
 ## docker-compose安装
+### 1. 安装
 ```shell script
+curl -SL https://github.com/docker/compose/releases/download/v2.5.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+// 过期
 curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose;
+```
+### 2. 授权
+```shell
+sudo chmod +x /usr/local/bin/docker-compose
+```
+### 3. 软连接（可选）
+```shell
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
 ## Elasticsearch7.5.1 docker-compose安装ES

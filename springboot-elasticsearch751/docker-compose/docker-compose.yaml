@@ -35,6 +35,7 @@ services:
         hard: -1
     volumes:
       - es7173data1:/usr/share/elasticsearch/data
+      - /mnt/certs/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
       - /mnt/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
@@ -60,6 +61,7 @@ services:
         hard: -1
     volumes:
       - es7173data2:/usr/share/elasticsearch/data
+      - /mnt/certs/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
       - /mnt/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
       - es7173net

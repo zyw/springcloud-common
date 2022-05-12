@@ -16,6 +16,8 @@ docker exec -it es7173_01 /usr/share/elasticsearch/bin/elasticsearch-certutil ce
 
 # `Elasticsearch`安全配置
 `Elasticsearch`安全配置分为三个级别：
+
+![](./1.png)
 ## 1、最低限度的安全性（开发环境）
 * 在`elasticsearch.yml`配置文件中添加如下配置
   ```yaml

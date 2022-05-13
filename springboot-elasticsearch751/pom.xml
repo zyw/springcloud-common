@@ -5,6 +5,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>rest-client</module>
+        <module>easy-es-demo</module>
     </modules>
     <parent>
         <artifactId>springcloud-common</artifactId>

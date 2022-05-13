@@ -23,6 +23,76 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
+## Lucene（Elasticsearch）中数据定义
+1. Document(文档)
+   Elasticsearch是面向文档的，文档是所有可搜索数据的最小单位，相当于数据库中一行记录。文档会被序列化成JSON格式，保存到ES中，每个文档都有一个ID(Unique ID)可以自定义也可以由ES生成。
+   每个文档都有一些元数据用于标注文档的相关信息：
+   * _index: 文档所属的索引名
+   * _type: 文档所属的类型名
+   * _id: 文档唯一的ID
+   * _source: 文档的原始JSON数据
+   * _version: 文档的版本信息
+   * _score: 相关性打分
+2. index(索引)
+   1). 索引是文档的容器，是一类文档的结合
+   * Index体现了逻辑空间的概念：每个索引都有自己的Mapping定义，用于定义包含的文档的字段名和字段类型
+   * Shard体现了物理空间的概念：索引中的数据分散在Shard上
+   2). 索引的Mapping与Settings
+   * Mapping定义文档字段的类型(相当于数据库的建表SQL(Schema))
+   * Setting定义不同的数据分布
+3. ES与数据库对比
+
+   |       RDBMS      | Elasticsearch |
+   | ---------------- | ------------- | 
+   |       Table      | Index(Type)   |
+   |       Row        | Document      |
+   |       Column     | Filed         |
+   | Schema(建表SQL)  | Mapping       |
+   |       SQL        | ES查询语言(DSL)|
+
+## Elasticsearch节点(node)角色
+```yaml
+node.roles: [ data, master, voting_only ]
+```
+node.roles您可以通过设置来定义节点的角色在elasticsearch.yml中。如果您设置node.roles，则仅向节点分配您指定的角色。如果不设置node.roles，则为节点分配以下角色：
+* master
+* data
+* data_content
+* data_hot
+* data_warm
+* data_cold
+* data_frozen
+* ingest
+* ml
+* remote_cluster_client
+* transform
+
+### Master-eligible node
+
+具有`master`角色的节点，使其有资格被选为控制集群 的主节点。
+
+### Data node
+
+具有`data`角色的节点。数据节点保存数据并执行数据相关操作，例如 CRUD、搜索和聚合。具有该`data`角色的节点可以填充任何专门的数据节点角色。
+
+### Ingest node
+
+ingest 节点可以看作是数据前置处理转换的节点，支持 pipeline管道 设置，可以使用 ingest 对数据进行过滤、转换等操作，类似于 logstash 中 filter 的作用，功能相当强大。
+
+[Elasticsearch的ETL利器——Ingest节点](https://juejin.cn/post/6844903873153335309)
+
+### Remote-eligible node
+
+`remote_cluster_client`使其有资格充当远程客户端
+
+### Machine learning node
+
+具有`ml`角色的节点。如果要使用机器学习功能，集群中必须至少有一个机器学习节点。有关更多信息，请参阅 [Elastic Stack 中的](https://www.elastic.co/guide/en/machine-learning/7.17/index.html)[机器学习设置](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/ml-settings.html)和机器学习。
+
+### Transform node
+
+具有`transform`角色的节点。如果要使用变换，集群中必须至少有一个变换节点。有关详细信息，请参阅 [转换设置](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/transform-settings.html)和[*转换数据*](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/transforms.html)。
+
 ## Elasticsearch7.5.1 docker-compose安装ES
 ```yaml
 version: '2.2'
@@ -116,10 +186,123 @@ sysctl -p
 ```
 
 ## 索引创建和查询
-```json
-# 查看插件列表
+
+### 基本操作
+
+```htaccess
+# 参看索引mapping
+GET _mapping
+# 查看指定索引setting
+GET kibana_sample_data_flights/_settings
+# 查看指定索引mapping
+GET kibana_sample_data_flights/_mapping
+
+# 查看插件
 GET /_cat/plugins
 
+# 查看索引模板
+GET /_cat/templates
+# 查看机器健康状况
+GET _cluster/health
+# 查看分片
+GET _cat/shards
+# 查看节点
+GET /_cat/nodes?v
+```
+
+### 文档的CRUD
+
+* Type名约定都用_doc
+* Index-如果ID不存在，创建新的文档。否则，先删除现有的文档，再创建新的文档，版本会增加
+* Create - 如果ID已经存在，会失败
+* Update-文档必须已经存在，更新只会对相应字段做增量修改
+
+```htaccess
+# Index
+PUT my_index/_doc/1
+{
+	"name": "zhangsan",
+	"age": 12
+}
+# Create
+PUT my_index/_create/1
+{
+	"name": "zhangsan",
+	"age": 12
+}
+POST my_index/_doc # 不指定ID,自动生成
+{
+	"name": "zhangsan",
+	"age": 12
+}
+# Read
+GET my_index/_doc/1
+# Update
+POST my_index/_update/1
+{
+	"doc":{
+        "name": "lisi",
+        "age": 20
+	}
+}
+# Delete
+DELETE my_index/_doc/1
+```
+
+### Bulk API
+
+* 支持在一次API调用中，对不同的索引进行操作
+* 支持四种类型的操作：Index、Create、Update、Delete。
+* 可以再URI中指定Index,也可以在请求的Payload中进行
+* 操作中单条操作失败，并不会影响其他操
+* 返回结果包括了每一条操作执行的结果
+
+```htaccess
+POST _bulk
+{ "index" : {"_index":"test","_id":"1" } }
+{ "field1" :"value1" }
+[ "delete": {"_index":"test","_id":"2" } }
+{ "create": {"_index":"test2","_id":"3" } }
+{ "field1":"value3" }
+{ "update" : { "_id":"1","_index":"test" } }
+{ "doc": {"field2":"value2" } }
+```
+
+### 批量读取 mget
+
+跟Bulk API类似
+
+```htaccess
+GET _mget
+{
+ "doc": [
+ 	{
+ 		"_index": "user",
+ 		"_id": 1
+ 	},
+ 	{
+ 		"_index": "comment",
+ 		"_id": 1
+ 	}
+ ]
+}
+```
+
+### 批量查询 msearch
+
+```htaccess
+POST users/_msearch
+{}
+{"query": {"match_all": {}}, "from": 0, "size": 10}
+{}
+{"query": {"match_all": {}}}
+{"index": "twitter2" }
+{"query": {"match_all": {}}}
+```
+
+
+
+```json
 #ik_max_word
 #ik_smart
 #Analyzer: ik_smart , ik_max_word , Tokenizer: ik_smart , ik_max_word
@@ -142,6 +325,11 @@ POST _analyze
 
 # 查看索引模板
 GET /_cat/templates
+
+# 查看索引相关信息
+GET kibana_sample_data_flights
+# 查看索引包含的文档总数
+GET kibana_sample_data_flights/_count
 
 # 创建索引
 PUT /security-evaluation-v35

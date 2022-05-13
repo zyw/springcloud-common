@@ -1,0 +1,47 @@
+entities: []
+intents:
+  - chitchat.greet
+  - chitchat.you_are_good
+  - chitchat.bye
+  - get_started
+  - chifan
+actions:
+  - action_botfront_disambiguation
+  - action_botfront_disambiguation_followup
+  - action_botfront_fallback
+  - action_botfront_mapping
+  - utter_chifan
+  - utter_DU3P6NUYS
+  - utter_I90ZoHZi-
+  - utter_bye
+forms: []
+responses:
+  utter_chifan:
+    - text: |-
+        吃了
+
+        是的
+
+        吃的米饭
+
+        吃的面
+
+        吃的饺子
+
+        吃的三秦套餐
+
+        吃的火锅
+      language: zh
+slots:
+  disambiguation_message:
+    type: unfeaturized
+  fallback_language:
+    type: unfeaturized
+    initial_value: zh
+  hi:
+    type: text
+    initial_value: 你好，请问有什么可以帮助您？
+    
+rasa_ext.extractors.regex_date_extractor.RegexDateExtractor
+
+actions.RegexDateExtractor

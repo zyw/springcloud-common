@@ -1,4 +1,5 @@
 ## docker安装Elasticsearch
+
 ```shell
 docker run --name elasticsearch --restart always \
 -c "sh elasticsearch-plugin install https://github.com/KennFalcon/elasticsearch-analysis-hanlp/releases/download/v7.5.1/elasticsearch-analysis-hanlp-7.5.1.zip 
@@ -23,10 +24,22 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
+## 正排索引和倒排索引的定义
+
+### 正排索引
+
+从id或者页码到文档，称为 **正排索引**
+
+### 倒排索引
+
+从文档到id或者页码，称为**倒排索引**
+
 ## Lucene（Elasticsearch）中数据定义
+
 1. Document(文档)
    Elasticsearch是面向文档的，文档是所有可搜索数据的最小单位，相当于数据库中一行记录。文档会被序列化成JSON格式，保存到ES中，每个文档都有一个ID(Unique ID)可以自定义也可以由ES生成。
    每个文档都有一些元数据用于标注文档的相关信息：
+   
    * _index: 文档所属的索引名
    * _type: 文档所属的类型名
    * _id: 文档唯一的ID
@@ -299,6 +312,513 @@ POST users/_msearch
 {"index": "twitter2" }
 {"query": {"match_all": {}}}
 ```
+
+## 分词
+
+### Analysis 与 Analyzer
+
+* Analysis-文本分析是把全文本转换一系列单词（term/token)的过程，也叫分词
+* Analysis 是通过 Analyzer 来实现的
+  * 可使用 Elasticsearch内置的分析器/或者按需定制化分析器
+* 除了在数据写入时转换词条，匹配Query语句时候也需要用相同的分析器对查询语句进行分析
+
+### Analyzer的组成
+
+分词器是专门处理分词的组件，Analyzer由三部分组成：
+
+* Character Filters(针对原始文本处理，例如去除html)
+*  Tokenizer(按照规则切分为单词)
+* Token Filter(将切分的的单词进行加工，小写，删除 stopwords,增加同义词)
+
+### 内置分词器
+
+* Standard Analyzer一默认分词器，按词切分，小写处理
+* Simple Analyzer 一按照非字母切分(符号被过滤)，小写处理
+* Stop Analyzer 一小写处理，停用词过滤(the,a，is)
+* Whitespace Analyzer一按照空格切分，不转小写
+* Keyword Analyzer 一不分词，直接将输入当作输出
+* Patter Analyzer 一正则表达式，默认 \W+(非字符分隔)
+* Language 一提供了30多种常见语言的分词器
+* Customer Analyzer自定义分词器
+
+## Search API
+
+### URL Search
+
+在URL中使用查询参数
+
+#### 指定字段V.S泛查询
+
+```htaccess
+# 带profile
+GET /movies/_search?q=2012&df=title
+{
+  "profile":"true"
+}
+
+# 泛查询，正对_all,所有字段
+GET /movies/_search?q=2012
+{
+  "profile":"true"
+}
+
+# 指定字段
+GET /movies/_search?q=title:2012
+{
+ "profile" :"true"
+}
+```
+
+#### Term v.s Phrase
+
+* Beautiful Mind 等效于 Beautiful OR Mind
+* "Beautiful Mind",等效于 Beautiful AND Mind。Phrase查询，还要求前后顺序保持一致
+
+```htaccess
+//使用引号，Phrase查询
+GET /movies/_search?q=title:"Beautiful Mind"
+{
+"profile":"true"
+}
+//查找美丽心灵，Mind为泛查询
+GET /movies/_search?q=title:Beautiful Mind
+{
+"profile":"true"
+}
+//分组，Bool查询
+GET /movies/_search?q=title:(Beautiful Mind)
+{
+"profile":"true"
+}
+```
+
+
+
+#### 分组与引号
+
+* title:(Beautiful AND Mind)
+* title="Beautiful Mind"
+
+#### 布尔操作
+
+* AND / OR / NOT 或者 && / ll / !
+  * 必须大写
+  * title:(matrix NOT reloaded)
+
+#### 分组
+
+* +表示must
+* -表示must_not
+* title:(+matrix-reloaded)
+
+```htaccess
+//查找美丽心灵
+GET /movies/_search?q=title:(Beautiful AND Mind)
+{
+"profile":"true"
+}
+//查找美丽心灵
+GET / movies/_ search?q = title:( Beautiful NOT Mind )
+{
+"profile":"true"
+}
+//查找美丽心灵 %2表示URL中的+
+GET /movies/_search?q=title:(Beautiful %2BMind)
+{
+"profile":"true"
+}
+```
+
+#### 范围查询
+
+区间表示：[]闭区间，{}开区间
+
+* year: {2019 TO 2018}
+* year:[* TO 2018]
+
+#### 算数符合
+
+* year:>2010
+* year:(>2010 && <=2018)
+* year:(+>2010 +<=2018)
+
+```htaccess
+//范围查询，区间写法/数学写法
+GET /movies/_search?q=year:>=1980
+{
+"profile":"true"
+}
+```
+
+#### 通配符查询
+
+通配符查询（通配符查询效率低，占用内存大，不建议使用。特别是放在最前面）
+
+* ？代表1个字符，*代表0或多个字符
+  * title:mi?d
+  * title:be*
+
+#### 正则表达式
+
+title:[bt]oy
+
+#### 模糊匹配与近似查询
+
+* title:befutifl~1
+* title:"lord rings"~2
+
+```htaccess
+//通配符查询
+GET /movies/_ search?q=title:b*
+{
+"profile":"true"
+}
+//模糊匹配&近似度匹配
+GET /movies/_search?q=title:beautifl~1
+{
+"profile":"true"
+}
+GET /movies/_search?q=title:"Lord Rings"~2
+{
+"profile":"true"
+}
+```
+
+
+
+### Request Body Search
+
+使用Elasticsearch提供的，基于JSQN格式的更加完备的Query Domain Specific Language (DSL)
+
+| 语法                     | 范围              |
+| ------------------------ | ----------------- |
+| _search                  | 集群上所有的索引  |
+| /index-1/_search         | index-1           |
+| /index-1,index-2/_search | index-1,index-2   |
+| /index-*/_search         | index-*开头的索引 |
+
+#### Query DSL特性
+
+* 分页 `from: 10, size: 20`
+
+* 排序 `sort:[{"id":"desc"}]`
+
+* _source filtering `"_source":["id","name"]`
+
+* 脚本字段
+
+  ```htaccess
+  # 脚本字段
+  GET kibana_sample_data_ecommerce/_search
+  {
+      "script_fields":{
+      	"new_field":{
+      		"script":{
+      			"Lang":"painless",
+      			"source":"doc['order_date'].value +'_hello'"
+      		}
+      	}	
+      },
+      "query":{
+        "match_all":{}
+      }
+  }
+  ```
+
+#### 使用查询表达式 - Match
+
+```htaccess
+# comment字段中的两个词是OR的关系
+GET /comments/_doc/_search
+{
+	"query":{
+		"match":{
+    		"comment":"Last Christmas"
+ 		}
+	}
+}
+
+# 如果要使用AND关系，请使用一下方法
+GET /comments/_doc/_search
+{
+	"query":{
+		"match":{
+			"comment":{
+				"query":"Last Chrismas",
+				"operator":"AND"
+			}
+		}
+	}
+}
+
+```
+
+#### 短语搜索 - Match Phrase
+
+```htaccess
+# 短语查询query的语句看成一个整体去查询，每个词按照顺序出现，slop设置成1，表示短语中级可以有一个其他字符
+GET /comments/_doc/_search
+{
+   "query":{
+       "match_phrase":{
+           "comment":{
+               "query":"Song Last Chrismas",
+               "slop":1
+            }
+         }
+     }
+}
+```
+
+#### Query String Query
+
+类似URI Query
+
+```htaccess
+POST users/_search
+{
+	"query": {
+		"query_string": {
+			"default_field": "name",
+			"query": "Ruan AND Yiming"
+		}
+	}
+}
+
+POST user/_search
+{
+	"query": {
+		"query_string": {
+			"fields": ["name", "about"],
+			"query": "(Ruan AND Yiming) OR (Java AND Elasticsearch)"
+		}
+	}
+}
+```
+
+#### Simple Query String Query
+
+* 类似Query String,但是会忽略错误的语法，同时只支持部分查询语法
+* 不支持AND OR NOT,会当作字符串处理
+* Term 之间默认的关系是OR,可以指定Operator
+* 支持 部分逻辑
+  * \+ 替代 AND
+  * | 替代 OR
+  * \- 替代 NOT
+
+```htaccess
+POST user/_search
+{
+	"query": {
+		"simple_query_string": {
+			"fields": ["name", "about"],
+			"query": "Ruan -Yiming",
+			"default_operator": "AND"
+		}
+	}
+}
+```
+
+## Mapping
+
+### 什么是Mapping
+
+1. Mapping类似数据库中的schema的定义，作用如下
+   * 定义索引中的字段的名称
+   * 定义字段的数据类型，例如字符串，数字，布尔...
+   * 字段，倒排索引的相关配置，（Analyzed or Not Analyzed）
+2. Mapping会把JSON文档映射成Lucene所需要的扁平格式
+3. 一个Mapping属于一个索引的Type
+   * 每个文档都属于一个Type
+   * 一个Type有一个Mapping定义
+   * 7.0开始，不需要在Mapping定义中指定type信息
+
+### 字段的数据类型
+
+1. 简单类型
+   * Text / Keyword
+   * Date
+   * Integer / Floating
+   * Boolean
+   * IPv4 & IPv6
+2. 复杂类型 - 对象和嵌套对象
+   * 对象类型 / 嵌套类型
+3. 特殊类型
+   * geo_point & geo_shape / percolator
+
+### 什么是 Dynamic Mapping
+
+* 在写入文档时候，如果索引不存在，会自动创建索引
+* Dynamic Mapping 的机制，使得我们无需手动定义Mappings。Elasticsearch 会自动根据文档信息，推算出字段的类型
+* 但是有时候会推算的不对，例如地理位置信息
+* 当类型如果设置不对时，会导致一些功能无法正常运行，例如Range查询
+
+### 能否更改Mapping的字段类型
+
+#### 新增加字段
+
+1. Dynamic设为true时，一旦有新的字段写入文档，Mapping也同时被更新。
+2. Dynamic设为false时，Mapping不会被更新，新增字段的数据无法被索引，但是是有信息会出现在_source中
+3. Dynamic设成Strict，文档写入失败
+
+#### 对已有字段
+
+Lucene实现的倒排索引，一旦生成后，就不允许修改。
+
+如果希望改变字段类型，必须Reindex API，重建索引
+
+### 控制 Dynamic Mapping
+
+```htaccess
+# 设置Dynamic
+PUT users
+{
+	"mappings": {
+		"_doc": {
+			"dynamic": "false"
+		}
+	}
+}
+```
+
+|               | true | false | strict |
+| ------------- | ---- | ----- | ------ |
+| 文档可索引    | YES  | YES   | NO     |
+| 字段可索引    | YES  | NO    | NO     |
+| Mapping被更新 | YES  | NO    | NO     |
+
+### 显示定义一个Mapping
+
+```htaccess
+PUT users
+{
+	"mappings": {
+		// 定义自己的mappings
+	}
+}
+```
+
+#### Index - 控制字段是否被索引
+
+Index - 控制当前字段是否被索引。默认为true。如果设置成 false,该字段不可被搜索
+
+```htaccess
+PUT users
+{
+	"mappings": {
+		"properties" : {
+			"firstName" : {
+				"type" : "text",
+				"index" : false,
+				"index_options": "offsets"
+			}
+		}
+	}
+}
+```
+
+##### Index Options
+
+1. 四种不同级别的Index Options配置，可以控制倒排索引记录的内容
+
+* docs - 记录 doc id
+* freqs - 记录 doc id和term frequencies
+* positions - 记录doc id / term frequencies / term position
+* offsets - doc id / term frequencies / term position / character offsets
+
+2. Text类型默认记录postions，其他默认为docs
+
+3. 记录内容越多，占用存储空间越大
+
+#### null_value
+
+需要对null值实现搜索，只有keyword类型支持设定null_value
+
+```htaccess
+PUT users
+{
+	"mappings": {
+		"properties" : {
+			"firstName" : {
+				"type" : "keyword",
+				"null_value" : "NULL"
+			}
+		}
+	}
+}
+```
+
+### 多字段类型（一个字段多个类型）
+
+1. 厂商名称实现精确匹配，增加一个keyword字段。
+2. 使用不同的analyzer，不同语言，pingyin字段的搜索，还支持为搜索和索引指定不同的analyzer
+
+### Exact Values vs Full Text
+
+* Exact Value: 包括数字 / 日期 / 具体一个字符串（例如：“Apple Store”苹果商店做为一个整体，不需要分词）需要设置成keyword类型，精确值不需要被分词
+* 全文本，非结构化的文本数据，在ES中指定为text类型，需要分词索引
+
+### 什么是 Index Template
+
+Index Templates - 帮助你设定 Mappings 和 Settings,并按照一定的规则，自动匹配到新创建的索引之上。模版仅在一个索引被新创建时，才会产生作用。修改模版不会影响已创建的索引。
+
+```htaccess
+# 创建所有索引默认使用的索引模板
+PUT _template/template_default
+{
+	"index_patterns" : ["*"],
+	"order" : 0,
+	"version" : 1,
+	"settings" : {
+		"number_of_shards" : 1,
+		"number_of_replicas" : 1
+	}
+}
+# 所有以test开头的索引使用的索引模板
+PUT /_template/template_test
+{
+	"index_patterns" : ["test*"],
+	"order" : 1,
+	"settings" : {
+		"number_of_shards" : 1,
+		"number_of_replicas" : 1
+	},
+	"mappings" : {
+		"date_detection" : false, //字符串转日期
+		"numeric_detaction" : true  //字符串转数字
+	}
+}
+```
+
+### 什么是Dynamic Template
+
+根据Elasticsearch识别的数据类型，结合字段名称，来动态设定字段类型
+
+```htaccess
+PUT my_test_index
+{
+	"mappings":{
+		"dynamic_templates":[
+			{
+				"full_name":{
+					"path_match": "name.*",
+					"path_unmatch":"*.middle",
+					"mapping":{
+						"type":"text",
+						"copy_to":"full_name"
+					}
+				}
+			}
+		]
+	}
+}
+
+```
+
+* Dynamic Tempate 是定义在在某个索引的 Mapping 中
+* Template有一个名称
+* 匹配规则是一个数组
+* 为匹配到的字段设置Mapping
 
 
 
